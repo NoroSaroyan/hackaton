@@ -5,38 +5,4 @@
     android:layout_height="match_parent"
     android:background="#0C0D13">
 
-    <View
-        android:id="@+id/group_2"
-        android:layout_width="301dp"
-        android:layout_height="301dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="29dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="127dp">
-
-        <View
-            android:id="@+id/ellipse_1"
-            android:layout_width="301dp"
-            android:layout_height="301dp"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="29dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="127dp"
-            android:background="#03061A"
-            android:elevation="115dp"/>
-
-        <View
-            android:id="@+id/group_1"
-            android:layout_width="227dp"
-            android:layout_height="91dp"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="60dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="227dp">
-
-        </View>
-
-    </View>
-
-
 </RelativeLayout>

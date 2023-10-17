@@ -1,21 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0C0D13">
+    android:background="#0C0D13"
+    tools:context="ru.team1802.mypostmail.LoginActivity">
 
     <TextView
-        android:id="@+id/some_id"
+        android:id="@+id/login_in_account"
         android:layout_width="301dp"
         android:layout_height="33dp"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginTop="235dp"
         android:gravity="center_horizontal|top"
-        android:text="Вход в аккаунт"
-        android:fontFamily="TT Ruins" />
+        android:text="@string/login_in_account"
+        android:textAppearance="@style/login_in_account"
+        android:fontFamily="@font/tt_runs_trial_bold"/>
 
-
+    <EditText
+        android:id="@+id/login_field"
+        android:layout_width="291dp"
+        android:layout_height="49dp"
+        android:layout_below="@+id/login_in_account"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="68dp"
+        android:layout_marginEnd="29dp"
+        android:autofillHints=""
+        android:gravity="center_vertical"
+        android:inputType="text"
+        android:text="@string/login"
+        android:textAppearance="@style/login" />
 
 </RelativeLayout>
