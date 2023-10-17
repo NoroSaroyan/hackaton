@@ -1,7 +1,5 @@
 package ru.team1802.mypostmail;
 
-
-import androidx.appcompat.R;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
