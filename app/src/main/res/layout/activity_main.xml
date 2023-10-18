@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0C0D13"
+    tools:context="ru.team1802.mypostmail.MainActivity"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/group_1"
+        android:layout_width="fill_parent"
+        android:layout_height="301dp"
+        android:layout_marginTop="127dp">
+        <View
+            android:id="@+id/circle1"
+            android:layout_width="301dp"
+            android:layout_height="301dp"
+            android:background="@drawable/circle1"
+            android:layout_centerHorizontal="true"/>
+
+        <ImageView
+            android:id="@+id/mailimg"
+            android:layout_width="81dp"
+            android:layout_height="81dp"
+            android:layout_alignStart="@+id/circle1"
+            android:layout_alignEnd="@+id/circle1"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginVertical="110dp"
+            android:layout_marginStart="31dp"
+            android:layout_marginEnd="189dp"
+            android:src="@drawable/mailimg"/>
+
+        <TextView
+            android:layout_width="146dp"
+            android:layout_height="91dp"
+            android:layout_alignEnd="@+id/circle1"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="43dp"
+            android:layout_marginBottom="110dp"
+            android:text="@string/mypost"
+            android:textAppearance="@style/mypost"
+            android:fontFamily="@font/tt_runs_trial_bold"
+            android:gravity="center_horizontal|top"/>
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/group_2"
+        android:layout_width="fill_parent"
+        android:layout_height="115dp"
+        android:layout_marginTop="131dp">
+
+        <TextView
+            android:id="@+id/button_main_login"
+            android:clickable="true"
+            android:focusable="true"
+            style="@style/elements_background_dark"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:layout_alignParentTop="true"
+            android:layout_marginHorizontal="29dp"
+            android:fontFamily="@font/tt_runs_trial_bold"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/login"
+            android:textAppearance="@style/button_text"/>
+
+        <TextView
+            android:id="@+id/button_main_register"
+            style="@style/elements_background"
+            android:layout_width="match_parent"
+            android:layout_height="49dp"
+            android:layout_below="@+id/button_main_login"
+            android:layout_marginHorizontal="29dp"
+            android:layout_marginTop="11dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/tt_runs_trial_bold"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/register"
+            android:textAppearance="@style/button_text"/>
+
+    </RelativeLayout>
+
+</LinearLayout>
