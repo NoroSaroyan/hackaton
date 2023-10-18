@@ -72,40 +72,43 @@ def geocode(address):
         toponym_coodrinates = toponym["Point"]["pos"]
         coord = " ".join(toponym_coodrinates.split()[::-1])
         return coord
+    else:
+        return web.Response(status=404, text="Invalid address.")
 
 
 app = web.Application()
 
 
 async def get_user_profile(request):
-        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
-        if not api_token:
-            return web.Response(status=401, text="JWT token missing in headers.")
+    api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
+    if not api_token:
+        return web.Response(status=401, text="JWT token missing in headers.")
 
-        try:
-            decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            return web.Response(status=401, text="JWT token has expired.")
-        except jwt.InvalidTokenError:
-            return web.Response(status=401, text="Invalid JWT token.")
+    try:
+        decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
+    except jwt.ExpiredSignatureError:
+        return web.Response(status=401, text="JWT token has expired.")
+    except jwt.InvalidTokenError:
+        return web.Response(status=401, text="Invalid JWT token.")
 
-        # You can now access the user's information from the decoded payload
-        email = decoded_payload.get("email")
-        if email:
-            query = "SELECT email, name, surname FROM users WHERE email = ?"
-            cursor.execute(query, (email,))
-            user_data = cursor.fetchone()
-            if user_data:
-                user_profile = {
-                    "email": user_data[0],
-                    "name": user_data[1],
-                    "surname": user_data[2],
-                }
-                return web.json_response(user_profile)
-            else:
-                return web.Response(status=404, text="User not found.")
+    # You can now access the user's information from the decoded payload
+    email = decoded_payload.get("email")
+    if email:
+        query = "SELECT email, name, surname FROM users WHERE email = ?"
+        cursor.execute(query, (email,))
+        user_data = cursor.fetchone()
+        if user_data:
+            user_profile = {
+                "email": user_data[0],
+                "name": user_data[1],
+                "surname": user_data[2],
+            }
+            return web.json_response(user_profile)
         else:
-            return web.Response(status=401, text="Invalid JWT token.")
+            return web.Response(status=404, text="User not found.")
+    else:
+        return web.Response(status=401, text="Invalid JWT token.")
+
 
 # Add the new route
 app.router.add_get("/user/profile", get_user_profile)
@@ -192,8 +195,8 @@ async def login(request):
 
         if not email:
             return web.Response(status=400, text="Email is required.")
-        query = 'SELECT email, password FROM users WHERE email = ?'
-        cursor.execute(query, (email, ))
+        query = "SELECT email, password FROM users WHERE email = ?"
+        cursor.execute(query, (email,))
         user_data = cursor.fetchone()
         if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[1]):
             # Password is correct, create and return a JWT token as the API token
@@ -206,7 +209,7 @@ async def login(request):
             return web.json_response({"api_token": api_token})
         else:
             return web.Response(status=401, text="Invalid email or password.")
-          
+
     except Exception as e:
         traceback.print_exc()
         return web.Response(status=500, text=f"Error: {str(e)}")
@@ -215,14 +218,14 @@ async def login(request):
 async def addname_and_surname(request):
     try:
         data = await request.json()
-        name = data['name']
-        surname = data['surname']
-        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        name = data["name"]
+        surname = data["surname"]
+        api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
             return web.Response(status=401, text="JWT token missing in headers.")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
-            email = decoded_payload.get('email')
+            email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
             return web.Response(status=401, text="JWT token has expired.")
         except jwt.InvalidTokenError:
@@ -237,48 +240,58 @@ async def addname_and_surname(request):
 
 async def passwordchange(request):
     try:
-        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
             return web.Response(status=401, text="JWT token missing in headers.")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
-            email = decoded_payload.get('email')
+            email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
             return web.Response(status=401, text="JWT token has expired.")
         except jwt.InvalidTokenError:
             return web.Response(status=401, text="Invalid JWT token.")
 
         data = await request.json()
-        old_password = data.get('old_password')
-        new_password = data.get('new_password')
+        old_password = data.get("old_password")
+        new_password = data.get("new_password")
 
         if not email or not old_password or not new_password:
-            return web.Response(status=400, text="Email, old_password, and new_password are required.")
+            return web.Response(
+                status=400, text="Email, old_password, and new_password are required."
+            )
 
         # Check the old password
         query = "SELECT password FROM users WHERE email = ?"
         cursor.execute(query, (email,))
         hashed_password_old = cursor.fetchone()
 
-        if hashed_password_old and passlib.hash.pbkdf2_sha256.verify(old_password, hashed_password_old[0]):
+        if hashed_password_old and passlib.hash.pbkdf2_sha256.verify(
+            old_password, hashed_password_old[0]
+        ):
             # Update the password with the new one
-            hashed_password_new = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(new_password)
-            cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password_new, email))
+            hashed_password_new = passlib.hash.pbkdf2_sha256.using(
+                rounds=1000, salt_size=16
+            ).hash(new_password)
+            cursor.execute(
+                "UPDATE users SET password = ? WHERE email = ?",
+                (hashed_password_new, email),
+            )
             conn.commit()
 
             # Create and return a new JWT token
             payload = {
-                'email': email,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+                "email": email,
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
             }
-            new_api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+            new_api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-            return web.json_response({'api_token': new_api_token})
+            return web.json_response({"api_token": new_api_token})
         else:
             return web.Response(status=401, text="Invalid old password.")
 
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
+
 
 async def get_offices_list(request):
     try:
@@ -314,7 +327,7 @@ def rating(id):
                 sum(list(map(lambda x: int(x[0]), rating_list))) / len(rating_list)
             ), len(rating_list)
         else:
-            return 0
+            return 0, 0
     except Exception as e:
         traceback.print_exc()
         return web.Response(status=500, text=f"Error: {str(e)}")
@@ -322,44 +335,78 @@ def rating(id):
 
 async def review(request):
     try:
-        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
             return web.Response(status=401, text="JWT token missing in headers.")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
-            email = decoded_payload.get('email')
+            email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
             return web.Response(status=401, text="JWT token has expired.")
         except jwt.InvalidTokenError:
             return web.Response(status=401, text="Invalid JWT token.")
         data = await request.json()
-        office_id = data['office_id']
-        rating = data['rating']
-        text = data['text']
-        query = 'SELECT id FROM users WHERE email = ?'
+        office_id = data["office_id"]
+        rating = data["rating"]
+        text = data["text"]
+        query = "SELECT id FROM users WHERE email = ?"
         cursor.execute(query, (email,))
         user_id = cursor.fetchone()
-        query = 'INSERT INTO reviews (office_id, user_id, rating, text) VALUES (?, ?, ?, ?)'
+        query = (
+            "INSERT INTO reviews (office_id, user_id, rating, text) VALUES (?, ?, ?, ?)"
+        )
         cursor.execute(query, (office_id, user_id[0], rating, text))
         conn.commit()
         return web.Response(status=200, text=f"Отзыв оставлен")
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
 
+
+async def get_reviews(request):
+    try:
+        data = await request.json()
+        address = data['address']
+        cursor.execute("""SELECT name, surname, rating, text
+                       FROM reviews
+                       INNER JOIN offices
+                       ON reviews.office_id = offices.id
+                       INNER JOIN users
+                       ON reviews.user_id = users.id
+                       WHERE address = ? """, (address,))
+        reviews_list = cursor.fetchall()
+        print(reviews_list)
+        if reviews_list:
+            out = []
+            for name, surname, rating, text in reviews_list:
+                out.append(
+                    {
+                        "name": f"{name} {surname}",
+                        "rating": rating,
+                        "text": text,
+                    }
+                )
+            return web.json_response(out)
+        else:
+            return web.Response(status=404, text="Reviews not found.")
+    except Exception as e:
+        traceback.print_exc()
+        return web.Response(status=500, text=f"Error: {str(e)}")
+
+
 async def ping(request):
     return web.Response(status=200, text="pong")
 
 
-
-app.router.add_post('/register', register)
-app.router.add_post('/login', login)
-app.router.add_get('/ping', ping)
-app.router.add_post('/passwordchange', passwordchange)
-app.router.add_get('/getuserprofile', get_user_profile)
-app.router.add_post('/review', review)
-app.router.add_post('/forgot_password', forgot_password)
-app.router.add_post('/addname_and_surname', addname_and_surname)
-app.router.add_get("/getofficeslist", get_offices_list)
+app.router.add_post("/register", register)
+app.router.add_post("/login", login)
+app.router.add_get("/ping", ping)
+app.router.add_post("/passwordchange", passwordchange)
+app.router.add_get("/get_user_profile", get_user_profile)
+app.router.add_post("/review", review)
+app.router.add_post("/forgot_password", forgot_password)
+app.router.add_post("/addname_and_surname", addname_and_surname)
+app.router.add_get("/get_offices_list", get_offices_list)
+app.router.add_get("/get_reviews", get_reviews)
 
 
 if __name__ == "__main__":
