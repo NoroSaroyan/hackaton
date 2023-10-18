@@ -88,11 +88,6 @@ async def get_user_profile(request):
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
 
-
-# Add the new route
-app.router.add_get('/user/profile', get_user_profile)
-
-
 async def forgot_password(request):
     try:
         data = await request.json()
@@ -166,9 +161,9 @@ async def login(request):
         if not email:
             return web.Response(status=400, text="Email is required.")
         query = 'SELECT email, password FROM users WHERE email = ?'
-        cursor.execute(query, (email))
+        cursor.execute(query, (email, ))
         user_data = cursor.fetchone()
-        if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
+        if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[1]):
             # Password is correct, create and return a JWT token as the API token
             payload = {
                 'email': user_data[0],
@@ -178,9 +173,10 @@ async def login(request):
             print(api_token)
             return web.json_response({'api_token': api_token})
         else:
-            return web.Response(status=401, text="Invalid email or phone number or password.")
+            return web.Response(status=401, text="Invalid email or password.")
 
     except Exception as e:
+        traceback.print_exc()
         return web.Response(status=500, text=f"Error: {str(e)}")
 
 
@@ -234,17 +230,13 @@ async def ping(request):
     return web.Response(status=200, text="pong")
 
 
-
-async def ping(request):
-    return web.Response(status=200, text="pong")
-
-
 app.router.add_post('/register', register)
 app.router.add_post('/login', login)
 app.router.add_get('/ping', ping)
 app.router.add_get('/passwordchange', passwordchange)
 app.router.add_get('/getuserprofile', get_user_profile)
 app.router.add_post('/review', review)
+app.router.add_post('/forgot_password', forgot_password)
 
 if __name__ == '__main__':
     web.run_app(app, host='0.0.0.0', port=8080)

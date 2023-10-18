@@ -4,14 +4,13 @@ from email.mime.text import MIMEText
 
 def send_email(to_email, new_password):
     # Configure your email server and credentials here
-    smtp_server = 'your-smtp-server.com'
-    smtp_port = 587
-    smtp_username = 'your-username'
-    smtp_password = 'your-password'
+    smtp_server = 'smtp.mail.ru'
+    smtp_port = 465
+    smtp_username = 'hackaton.postmail@mail.ru'
+    smtp_password = 'AESXAEg5Sjw2Q4yR1EjD'
 
     # Create an SMTP connection
-    server = smtplib.SMTP(smtp_server, smtp_port)
-    server.starttls()
+    server = smtplib.SMTP_SSL(smtp_server, smtp_port)
     server.login(smtp_username, smtp_password)
 
     # Compose the email message
