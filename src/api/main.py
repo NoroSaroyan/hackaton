@@ -55,7 +55,7 @@ app = web.Application()
 
 
 async def get_user_profile(request):
-    try:
+
         api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
         if not api_token:
             return web.Response(status=401, text="JWT token missing in headers.")
@@ -85,8 +85,6 @@ async def get_user_profile(request):
         else:
             return web.Response(status=401, text="Invalid JWT token.")
 
-    except Exception as e:
-        return web.Response(status=500, text=f"Error: {str(e)}")
 
 async def forgot_password(request):
     try:
@@ -185,7 +183,6 @@ async def passwordchange(request):
         api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
         if not api_token:
             return web.Response(status=401, text="JWT token missing in headers.")
-
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
             email = decoded_payload.get('email')
@@ -229,12 +226,20 @@ async def passwordchange(request):
 
 async def review(request):
     try:
+        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        if not api_token:
+            return web.Response(status=401, text="JWT token missing in headers.")
+        try:
+            decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
+            email = decoded_payload.get('email')
+        except jwt.ExpiredSignatureError:
+            return web.Response(status=401, text="JWT token has expired.")
+        except jwt.InvalidTokenError:
+            return web.Response(status=401, text="Invalid JWT token.")
         data = await request.json()
         office_id = data['office_id']
         rating = data['rating']
         text = data['text']
-        decoded_payload = requests.get('http://192.168.68.85:8080/').json()
-        email = decoded_payload['email']
         query = 'SELECT id FROM users WHERE email = ?'
         cursor.execute(query, (email,))
         user_id = cursor.fetchone()
@@ -252,7 +257,7 @@ async def ping(request):
 app.router.add_post('/register', register)
 app.router.add_post('/login', login)
 app.router.add_get('/ping', ping)
-app.router.add_get('/passwordchange', passwordchange)
+app.router.add_post('/passwordchange', passwordchange)
 app.router.add_get('/getuserprofile', get_user_profile)
 app.router.add_post('/review', review)
 app.router.add_post('/forgot_password', forgot_password)
