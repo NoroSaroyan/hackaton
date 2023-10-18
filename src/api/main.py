@@ -130,7 +130,9 @@ async def register(request):
             return web.Response(status=400, text="Email and password are required.")
 
         # Hash the password before storing it
-        hashed_password = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(password)
+        hashed_password = passlib.hash.pbkdf2_sha256.using(
+            rounds=1000, salt_size=16
+        ).hash(password)
 
         cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
         conn.commit()
@@ -205,6 +207,25 @@ async def passwordchange(request):
         return web.Response(status=200, text=f"Пароль сменен")
     else:
         return web.Response(status=406, text=f"Пароли не совпадают")
+
+
+async def sdfds():
+    try:
+        cursor.execute("SELECT id, office_id, rating,text FROM reviews")
+        user_data = cursor.fetchone()
+        # if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
+        #     # Password is correct, create and return a JWT token as the API token
+        #     payload = {
+        #         "email": user_data[0],
+        #         "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
+        #     }
+        #     api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        #     print(api_token)
+        #     return web.json_response({"api_token": api_token})
+        # else:
+        #     return web.Response(
+        #         status=401, text="Invalid email or phone number or password."
+        #     )
 
 
 async def ping(request):
