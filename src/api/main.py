@@ -13,11 +13,10 @@ import string
 
 from send_email import send_email
 
-# Create an SQLite database (you can change the name)
+
 conn = sqlite3.connect("user_db.sqlite")
 cursor = conn.cursor()
 
-# Create a table for storing users
 cursor.execute(
     """
     CREATE TABLE IF NOT EXISTS users (
@@ -56,7 +55,6 @@ cursor.execute(
 
 conn.commit()
 
-# Secret key for JWT token, change this to a strong secret in production
 SECRET_KEY = "your-secret-key"
 API_KEY = "40d1649f-0493-4b70-98ba-98533de7710b"
 
@@ -73,7 +71,7 @@ def geocode(address):
         coord = " ".join(toponym_coodrinates.split()[::-1])
         return coord
     else:
-        return web.Response(status=404, text="Invalid address.")
+        return web.Response(status=404, text="Неправильный адресс.")
 
 
 app = web.Application()
@@ -82,16 +80,15 @@ app = web.Application()
 async def get_user_profile(request):
     api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
     if not api_token:
-        return web.Response(status=401, text="JWT token missing in headers.")
+        return web.Response(status=401, text="JWT отсутсвует в хедерах.")
 
     try:
         decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
-        return web.Response(status=401, text="JWT token has expired.")
+        return web.Response(status=401, text="JWT токен просрочен.")
     except jwt.InvalidTokenError:
-        return web.Response(status=401, text="Invalid JWT token.")
+        return web.Response(status=401, text="Неправильный JWT токен.")
 
-    # You can now access the user's information from the decoded payload
     email = decoded_payload.get("email")
     if email:
         query = "SELECT email, name, surname FROM users WHERE email = ?"
@@ -105,12 +102,12 @@ async def get_user_profile(request):
             }
             return web.json_response(user_profile)
         else:
-            return web.Response(status=404, text="User not found.")
+            return web.Response(status=404, text="Пользователь не найден")
     else:
-        return web.Response(status=401, text="Invalid JWT token.")
+        return web.Response(status=401, text="Неправильный JWT токен.")
 
 
-# Add the new route
+
 app.router.add_get("/user/profile", get_user_profile)
 
 
@@ -120,14 +117,12 @@ async def forgot_password(request):
         email = data.get("email")
 
         if not email:
-            return web.Response(status=400, text="Email is required.")
+            return web.Response(status=400, text="Email обязателен.")
 
-        # Generate a new random password
         new_password = "".join(
             random.choices(string.ascii_letters + string.digits, k=12)
         )
 
-        # Update the user's password in the database
         hashed_password = passlib.hash.pbkdf2_sha256.using(
             rounds=1000, salt_size=16
         ).hash(new_password)
@@ -136,16 +131,14 @@ async def forgot_password(request):
         )
         conn.commit()
 
-        # Send the new password by email
         send_email(email, new_password)
 
-        return web.Response(status=200, text="New password sent to your email.")
+        return web.Response(status=200, text="Новый временный пароль отправлен на вашу почту.")
 
     except Exception as e:
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
-# Registration handler
 async def register(request):
     try:
         data = await request.json()
@@ -154,9 +147,8 @@ async def register(request):
         password = data.get("password")
 
         if not email or not password:
-            return web.Response(status=400, text="Email and password are required.")
+            return web.Response(status=400, text="Email и пароль обязательны.")
 
-        # Hash the password before storing it
         hashed_password = passlib.hash.pbkdf2_sha256.using(
             rounds=1000, salt_size=16
         ).hash(password)
@@ -167,7 +159,6 @@ async def register(request):
         )
         conn.commit()
 
-        # Create and return a JWT token as the API token
         payload = {
             "email": email,
             "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
@@ -182,10 +173,9 @@ async def register(request):
             raise
     except Exception as e:
         traceback.print_exc()
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
-# Login handler
 async def login(request):
     try:
         data = await request.json()
@@ -194,12 +184,11 @@ async def login(request):
         print(data)
 
         if not email:
-            return web.Response(status=400, text="Email is required.")
+            return web.Response(status=400, text="Email обязателен")
         query = "SELECT email, password FROM users WHERE email = ?"
         cursor.execute(query, (email,))
         user_data = cursor.fetchone()
         if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[1]):
-            # Password is correct, create and return a JWT token as the API token
             payload = {
                 "email": user_data[0],
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
@@ -208,11 +197,11 @@ async def login(request):
             print(api_token)
             return web.json_response({"api_token": api_token})
         else:
-            return web.Response(status=401, text="Invalid email or password.")
+            return web.Response(status=401, text="Неправильный email или пароль")
 
     except Exception as e:
         traceback.print_exc()
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def addname_and_surname(request):
@@ -222,34 +211,34 @@ async def addname_and_surname(request):
         surname = data["surname"]
         api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
-            return web.Response(status=401, text="JWT token missing in headers.")
+            return web.Response(status=401, text="JWT токен отсутсвует в хедерах.")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
             email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
-            return web.Response(status=401, text="JWT token has expired.")
+            return web.Response(status=401, text="JWT токен просрочен")
         except jwt.InvalidTokenError:
-            return web.Response(status=401, text="Invalid JWT token.")
+            return web.Response(status=401, text="Неправильный JWT токен")
         query = "UPDATE users SET name = ?, surname = ? WHERE email = ?"
         cursor.execute(query, (name, surname, email))
         conn.commit()
         return web.Response(status=200, text=f"Имя и фамилия обновленна")
     except Exception as e:
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def passwordchange(request):
     try:
         api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
-            return web.Response(status=401, text="JWT token missing in headers.")
+            return web.Response(status=401, text="JWT отсутствует в хедерах.")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
             email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
-            return web.Response(status=401, text="JWT token has expired.")
+            return web.Response(status=401, text="JWT просрочен.")
         except jwt.InvalidTokenError:
-            return web.Response(status=401, text="Invalid JWT token.")
+            return web.Response(status=401, text="Неправильный JWT токен")
 
         data = await request.json()
         old_password = data.get("old_password")
@@ -257,10 +246,9 @@ async def passwordchange(request):
 
         if not email or not old_password or not new_password:
             return web.Response(
-                status=400, text="Email, old_password, and new_password are required."
+                status=400, text="Email, старый пароль, и новый пароль обязательны."
             )
 
-        # Check the old password
         query = "SELECT password FROM users WHERE email = ?"
         cursor.execute(query, (email,))
         hashed_password_old = cursor.fetchone()
@@ -268,7 +256,6 @@ async def passwordchange(request):
         if hashed_password_old and passlib.hash.pbkdf2_sha256.verify(
             old_password, hashed_password_old[0]
         ):
-            # Update the password with the new one
             hashed_password_new = passlib.hash.pbkdf2_sha256.using(
                 rounds=1000, salt_size=16
             ).hash(new_password)
@@ -278,7 +265,6 @@ async def passwordchange(request):
             )
             conn.commit()
 
-            # Create and return a new JWT token
             payload = {
                 "email": email,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
@@ -287,10 +273,10 @@ async def passwordchange(request):
 
             return web.json_response({"api_token": new_api_token})
         else:
-            return web.Response(status=401, text="Invalid old password.")
+            return web.Response(status=401, text="Неверный старый пароль")
 
     except Exception as e:
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def get_offices_list(request):
@@ -311,10 +297,10 @@ async def get_offices_list(request):
                 )
             return web.json_response(out)
         else:
-            return web.Response(status=404, text="Offices not found.")
+            return web.Response(status=404, text="Отделения не найдены.")
     except Exception as e:
         traceback.print_exc()
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 def rating(id):
@@ -330,21 +316,21 @@ def rating(id):
             return 0, 0
     except Exception as e:
         traceback.print_exc()
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def review(request):
     try:
         api_token = request.headers.get("Authorization", "").split("Bearer ")[-1]
         if not api_token:
-            return web.Response(status=401, text="JWT token missing in headers.")
+            return web.Response(status=401, text="JWT токен отсутсвует в хедерах")
         try:
             decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
             email = decoded_payload.get("email")
         except jwt.ExpiredSignatureError:
-            return web.Response(status=401, text="JWT token has expired.")
+            return web.Response(status=401, text="JWT токен просрочен.")
         except jwt.InvalidTokenError:
-            return web.Response(status=401, text="Invalid JWT token.")
+            return web.Response(status=401, text="Неправильный JWT токен.")
         data = await request.json()
         office_id = data["office_id"]
         rating = data["rating"]
@@ -359,7 +345,7 @@ async def review(request):
         conn.commit()
         return web.Response(status=200, text=f"Отзыв оставлен")
     except Exception as e:
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def get_reviews(request):
@@ -387,10 +373,10 @@ async def get_reviews(request):
                 )
             return web.json_response(out)
         else:
-            return web.Response(status=404, text="Reviews not found.")
+            return web.Response(status=404, text="Оценки не найдены.")
     except Exception as e:
         traceback.print_exc()
-        return web.Response(status=500, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Ошибка: {str(e)}")
 
 
 async def ping(request):
