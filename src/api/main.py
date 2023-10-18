@@ -236,7 +236,7 @@ app.router.add_post('/register', register)
 app.router.add_post('/login', login)
 app.router.add_get('/ping', ping)
 app.router.add_get('/passwordchange', passwordchange)
-app.router.add_post('/getuserprofile', get_user_profile)
+app.router.add_get('/getuserprofile', get_user_profile)
 
 if __name__ == '__main__':
     web.run_app(app, host='0.0.0.0', port=8080)
