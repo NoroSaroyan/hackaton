@@ -215,11 +215,10 @@ async def passwordchange(request):
 async def review(request):
     try:
         data = await request.json()
-        api_token = data.get('api_token')
         office_id = data['office_id']
         rating = data['rating']
         text = data['text']
-        decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms="HS256")
+        decoded_payload = requests.get('http://192.168.68.85:8080/').json()
         email = decoded_payload['email']
         query = 'SELECT id FROM users WHERE email = ?'
         cursor.execute(query, (email,))
@@ -234,24 +233,6 @@ async def review(request):
 async def ping(request):
     return web.Response(status=200, text="pong")
 
-
-async def sdfds():
-    try:
-        cursor.execute("SELECT id, office_id, rating,text FROM reviews")
-        user_data = cursor.fetchone()
-        # if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
-        #     # Password is correct, create and return a JWT token as the API token
-        #     payload = {
-        #         "email": user_data[0],
-        #         "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
-        #     }
-        #     api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-        #     print(api_token)
-        #     return web.json_response({"api_token": api_token})
-        # else:
-        #     return web.Response(
-        #         status=401, text="Invalid email or phone number or password."
-        #     )
 
 
 async def ping(request):
