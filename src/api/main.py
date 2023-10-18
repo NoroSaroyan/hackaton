@@ -13,11 +13,32 @@ cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT DEFAULT NULL,
-        phone_number TEXT DEFAULT NULL,
-        password TEXT
+        email TEXT UNIQUE,
+        password TEXT,
+        username TEXT UNIQUE,
+        name TEXT default NULL,
+        surname TEXT default NULL
     )
 ''')
+
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS offices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        address TEXT
+    )
+''')
+
+# Create the 'reviews' table
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        office_id INTEGER,
+        rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+        text TEXT,
+        FOREIGN KEY (office_id) REFERENCES offices(id)
+    )
+''')
+
 conn.commit()
 
 # Secret key for JWT token, change this to a strong secret in production
@@ -31,24 +52,22 @@ async def register(request):
         data = await request.json()
         print(data)
         email = data.get('email')
-        phone_number = data.get('phone_number')
         password = data.get('password')
 
 
-        if not email and not phone_number or not password:
-            return web.Response(status=400, text="Email, phone number, and password are required.")
+        if not email or not password:
+            return web.Response(status=400, text="Email and password are required.")
 
         # Hash the password before storing it
         hashed_password = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(password)
 
-        cursor.execute('INSERT INTO users (email, phone_number, password) VALUES (?, ?, ?)', (email, phone_number, hashed_password))
+        cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
         conn.commit()
 
         # Create and return a JWT token as the API token
         payload = {
             'email': email,
-            'phone_number': phone_number,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
         }
         api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 
@@ -61,21 +80,19 @@ async def login(request):
     try:
         data = await request.json()
         email = data.get('email')
-        phone_number = data.get('phone_number')
         password = data.get('password')
         print(data)
 
-        if not email and not phone_number:
-            return web.Response(status=400, text="Email or phone number is required.")
-        query = 'SELECT email, phone_number, password FROM users WHERE email = ? OR phone_number = ?'
-        cursor.execute(query, (email, phone_number))
+        if not email:
+            return web.Response(status=400, text="Email is required.")
+        query = 'SELECT email, password FROM users WHERE email = ?'
+        cursor.execute(query, (email))
         user_data = cursor.fetchone()
         if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
             # Password is correct, create and return a JWT token as the API token
             payload = {
                 'email': user_data[0],
-                'phone_number': user_data[1],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
             }
             api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
             print(api_token)
