@@ -4,7 +4,8 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="login_in_account">Вход в аккаунт</string>
-    <string name="login">Номер телефона или почта</string>
-    <string name="password">Пароль</string>
+    <string name="login_field">Номер телефона или почта</string>
+    <string name="password_field">Пароль</string>
     <string name="forgot_password">Забыли пароль?</string>
+    <string name="login">Войти</string>
 </resources>

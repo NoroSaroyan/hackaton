@@ -24,7 +24,8 @@
 
     <EditText
         android:id="@+id/login_field"
-        android:layout_width="291dp"
+        android:background="@drawable/rectangle_1"
+        android:layout_width="match_parent"
         android:layout_height="49dp"
         android:layout_below="@+id/login_in_account"
         android:layout_alignParentStart="true"
@@ -34,8 +35,61 @@
         android:layout_marginEnd="29dp"
         android:autofillHints=""
         android:gravity="center_vertical"
+        android:textAppearance="@style/login_field"
         android:inputType="text"
+        android:hint="@string/login_field"
+        android:textColorHint="@color/light_gray"
+        android:fontFamily="@font/tt_runs_trial_regular"
+        android:paddingHorizontal="10dp"/>
+
+    <EditText
+        android:id="@+id/password_field"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:layout_below="@+id/login_field"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="29dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="25dp"
+        android:autofillHints=""
+        android:background="@drawable/rectangle_1"
+        android:fontFamily="@font/tt_runs_trial_regular"
+        android:gravity="center_vertical"
+        android:textAppearance="@style/password_field"
+        android:hint="@string/password_field"
+        android:inputType="textPassword"
+        android:paddingHorizontal="10dp"
+        android:textColorHint="@color/light_gray"/>
+
+    <TextView
+        android:id="@+id/forgot_password"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_width="144dp"
+        android:layout_height="49dp"
+        android:layout_below="@+id/password_field"
+        android:layout_alignStart="@+id/password_field"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="4dp"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:text="@string/forgot_password"
+        android:textAppearance="@style/forgot_password"
+        android:fontFamily="@font/tt_runs_trial_thin"/>
+
+    <Button
+        android:id="@+id/button_login"
+        android:background="@android:color/white"
+        android:layout_width="100dp"
+        android:layout_height="49dp"
+        android:layout_below="@+id/password_field"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="29dp"
+        android:gravity="center"
         android:text="@string/login"
-        android:textAppearance="@style/login" />
+        android:textAppearance="@style/button_login"
+        android:fontFamily="@font/tt_runs_trial_regular"/>
 
 </RelativeLayout>
