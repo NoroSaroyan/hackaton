@@ -4,8 +4,12 @@ import traceback
 import passlib.hash
 from aiohttp import web
 import jwt
-import requests
 import datetime
+
+import random
+import string
+
+from send_email import send_email
 
 # Create an SQLite database (you can change the name)
 conn = sqlite3.connect('user_db.sqlite')
@@ -17,7 +21,6 @@ cursor.execute('''
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE,
         password TEXT,
-        username TEXT UNIQUE,
         name TEXT default NULL,
         surname TEXT default NULL
     )
@@ -67,15 +70,14 @@ async def get_user_profile(request):
         # You can now access the user's information from the decoded payload
         email = decoded_payload.get('email')
         if email:
-            query = "SELECT email, username, name, surname FROM users WHERE email = ?"
+            query = "SELECT email, name, surname FROM users WHERE email = ?"
             cursor.execute(query, (email,))
             user_data = cursor.fetchone()
             if user_data:
                 user_profile = {
                     'email': user_data[0],
-                    'username': user_data[1],
-                    'name': user_data[2],
-                    'surname': user_data[3]
+                    'name': user_data[1],
+                    'surname': user_data[2]
                 }
                 return web.json_response(user_profile)
             else:
@@ -89,6 +91,31 @@ async def get_user_profile(request):
 
 # Add the new route
 app.router.add_get('/user/profile', get_user_profile)
+
+
+async def forgot_password(request):
+    try:
+        data = await request.json()
+        email = data.get('email')
+
+        if not email:
+            return web.Response(status=400, text="Email is required.")
+
+        # Generate a new random password
+        new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+        # Update the user's password in the database
+        hashed_password = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(new_password)
+        cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, email))
+        conn.commit()
+
+        # Send the new password by email
+        send_email(email, new_password)
+
+        return web.Response(status=200, text="New password sent to your email.")
+
+    except Exception as e:
+        return web.Response(status=500, text=f"Error: {str(e)}")
 
 
 # Registration handler
