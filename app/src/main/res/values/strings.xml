@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">My Post Mail</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="mypost">Моя почта</string>
+    <string name="login">Войти</string>
+    <string name="register">Зарегестрироваться</string>
     <string name="login_in_account">Вход в аккаунт</string>
-    <string name="login_field">Номер телефона или почта</string>
+    <string name="login_field">Электронная почта</string>
+    <string name="repeat_password_field">Повторите пароль</string>
     <string name="password_field">Пароль</string>
     <string name="forgot_password">Забыли пароль?</string>
-    <string name="login">Войти</string>
+    <string name="registration">Регистрация</string>
+
 </resources>

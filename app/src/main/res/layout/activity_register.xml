@@ -9,7 +9,7 @@
     tools:context="ru.team1802.mypostmail.LoginActivity">
 
     <TextView
-        android:id="@+id/login_in_account"
+        android:id="@+id/registration"
         android:layout_width="301dp"
         android:layout_height="33dp"
         android:layout_alignParentStart="true"
@@ -18,19 +18,20 @@
         android:layout_marginTop="235dp"
         android:fontFamily="@font/tt_runs_trial_bold"
         android:gravity="center_horizontal|top"
-        android:text="@string/login_in_account"
+        android:text="@string/registration"
         android:textAppearance="@style/title_text"
         tools:ignore="TextSizeCheck" />
 
     <EditText
-        android:id="@+id/login_field"
+        android:id="@+id/reg_login_field"
+        style="@style/elements_background_dark"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:layout_below="@+id/login_in_account"
+        android:layout_below="@+id/registration"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="29dp"
-        android:layout_marginTop="68dp"
+        android:layout_marginTop="66dp"
         android:layout_marginEnd="29dp"
         android:autofillHints=""
         android:fontFamily="@font/tt_runs_trial_regular"
@@ -39,15 +40,14 @@
         android:inputType="text"
         android:paddingHorizontal="10dp"
         android:textAppearance="@style/login_field"
-        android:textColorHint="@color/light_gray"
-        style="@style/elements_background_dark"/>
+        android:textColorHint="@color/light_gray" />
 
     <EditText
-        android:id="@+id/password_field"
+        android:id="@+id/reg_password_field"
         style="@style/elements_background_dark"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:layout_below="@+id/login_field"
+        android:layout_below="@+id/reg_login_field"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="29dp"
@@ -62,38 +62,42 @@
         android:textAppearance="@style/password_field"
         android:textColorHint="@color/light_gray" />
 
-    <TextView
-        android:id="@+id/forgot_password"
-        android:clickable="true"
-        android:focusable="true"
-        android:layout_width="144dp"
+    <EditText
+        android:id="@+id/repeat_password_field"
+        style="@style/elements_background_dark"
+        android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:layout_below="@+id/password_field"
-        android:layout_alignStart="@+id/password_field"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="4dp"
-        android:background="@android:color/transparent"
+        android:layout_below="@+id/reg_password_field"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="34dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="23dp"
+        android:autofillHints=""
+        android:fontFamily="@font/tt_runs_trial_regular"
         android:gravity="center_vertical"
-        android:text="@string/forgot_password"
-        android:textAppearance="@style/forgot_password"
-        android:fontFamily="@font/tt_runs_trial_thin"/>
+        android:hint="@string/repeat_password_field"
+        android:inputType="textPassword"
+        android:paddingHorizontal="10dp"
+        android:textAppearance="@style/password_field"
+        android:textColorHint="@color/light_gray" />
 
     <TextView
-        android:id="@+id/button_login"
+        android:id="@+id/button_register"
         style="@style/elements_background"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:layout_below="@+id/forgot_password"
+        android:layout_below="@+id/repeat_password_field"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="29dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="29dp"
         android:clickable="true"
         android:focusable="true"
         android:fontFamily="@font/tt_runs_trial_bold"
         android:gravity="center"
-        android:text="@string/login"
+        android:text="@string/register"
         android:textAppearance="@style/button_text" />
 
 </RelativeLayout>

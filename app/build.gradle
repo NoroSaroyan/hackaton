@@ -4,12 +4,13 @@ plugins {
 
 android {
     namespace 'ru.team1802.mypostmail'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "ru.team1802.mypostmail"
         minSdk 23
-        targetSdk 33
+        //noinspection EditedTargetSdkVersion
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -26,7 +27,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    buildToolsVersion '33.0.1'
+    packagingOptions {
+        exclude 'META-INF/README'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/*.properties'
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+    }
 }
 
 dependencies {

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="login_in_account">
+    <style name="elements_background_dark">
+        <item name="android:background">@color/dark_blue</item>
+        <item name="cornerRadius">10dp</item>
+    </style>
+    <style name="elements_background">
+        <item name="android:background">@color/blue</item>
+        <item name="cornerRadius">10dp</item>
+    </style>
+    <style name="mypost">
+        <item name="android:textSize">35sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+    <style name="title_text">
         <item name="android:textSize">25sp</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
@@ -16,7 +28,7 @@
         <item name="android:textSize">10sp</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
-    <style name="button_login">
+    <style name="button_text">
         <item name="android:textSize">15sp</item>
         <item name="android:textColor">#FFFFFF</item>
     </style>
