@@ -182,30 +182,49 @@ async def login(request):
 
 async def passwordchange(request):
     try:
+        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        if not api_token:
+            return web.Response(status=401, text="JWT token missing in headers.")
+
+        try:
+            decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
+            email = decoded_payload.get('email')
+        except jwt.ExpiredSignatureError:
+            return web.Response(status=401, text="JWT token has expired.")
+        except jwt.InvalidTokenError:
+            return web.Response(status=401, text="Invalid JWT token.")
+
         data = await request.json()
-        print(data)
         old_password = data.get('old_password')
         new_password = data.get('new_password')
-        new_password_repeat = data.get('new_password_repeat')
-        if new_password == new_password_repeat:
-            decoded_payload = requests.get('http://192.168.68.85:8080/').json()
-            print(decoded_payload)
-            email = decoded_payload['email']
-            if email:
-                query = "SELECT password FROM users WHERE email = ?"
-                cursor.execute(query, (email,))
-                hashed_password_old = cursor.fetchone()
-                print(hashed_password_old)
-                if passlib.hash.pbkdf2_sha256.verify(old_password, hashed_password_old[0]):
-                    hashed_password_new = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(new_password)
-                    cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password_new, email))
-            print('сделано')
+
+        if not email or not old_password or not new_password:
+            return web.Response(status=400, text="Email, old_password, and new_password are required.")
+
+        # Check the old password
+        query = "SELECT password FROM users WHERE email = ?"
+        cursor.execute(query, (email,))
+        hashed_password_old = cursor.fetchone()
+
+        if hashed_password_old and passlib.hash.pbkdf2_sha256.verify(old_password, hashed_password_old[0]):
+            # Update the password with the new one
+            hashed_password_new = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(new_password)
+            cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password_new, email))
             conn.commit()
-            return web.Response(status=200, text=f"Пароль сменен")
+
+            # Create and return a new JWT token
+            payload = {
+                'email': email,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+            }
+            new_api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+            return web.json_response({'api_token': new_api_token})
         else:
-            return web.Response(status=406, text=f"Пароли не совпадают")
+            return web.Response(status=401, text="Invalid old password.")
+
     except Exception as e:
-        return web.Response(status=450, text=f"Error: {str(e)}")
+        return web.Response(status=500, text=f"Error: {str(e)}")
 
 
 async def review(request):
