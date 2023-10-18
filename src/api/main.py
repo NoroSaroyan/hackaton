@@ -4,32 +4,32 @@ import traceback
 import passlib.hash
 from aiohttp import web
 import jwt
-import requests
 import datetime
 
 # Create an SQLite database (you can change the name)
-conn = sqlite3.connect('user_db.sqlite')
+conn = sqlite3.connect("user_db.sqlite")
 cursor = conn.cursor()
 
 # Create a table for storing users
-cursor.execute('''
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE,
         password TEXT,
-        username TEXT UNIQUE,
-        name TEXT default NULL,
-        surname TEXT default NULL
+        username TEXT UNIQUE
     )
-''')
+"""
+)
 
-cursor.execute('''
+cursor.execute(
+    """
     CREATE TABLE IF NOT EXISTS offices (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         address TEXT
     )
-''')
-
+"""
+)
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS reviews (
@@ -41,12 +41,13 @@ cursor.execute('''
         FOREIGN KEY (office_id) REFERENCES offices(id),
         FOREIGN KEY (user_id) REFERENCES users(id)
     )
-''')
+'''
+)
 
 conn.commit()
 
 # Secret key for JWT token, change this to a strong secret in production
-SECRET_KEY = 'your-secret-key'
+SECRET_KEY = "your-secret-key"
 
 app = web.Application()
 
@@ -98,23 +99,26 @@ async def register(request):
         print(data)
         email = data.get('email')
         password = data.get('password')
-
         if not email or not password:
             return web.Response(status=400, text="Email and password are required.")
 
         # Hash the password before storing it
-        hashed_password = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(password)
+        hashed_password = passlib.hash.pbkdf2_sha256.using(
+            rounds=1000, salt_size=16
+        ).hash(password)
 
-        cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
+        cursor.execute(
+            "INSERT INTO users (email, password) VALUES (?, ?)",
+            (email, hashed_password),
+        )
         conn.commit()
 
         # Create and return a JWT token as the API token
         payload = {
-            'email': email,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+            "email": email,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
         }
-        api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
-
+        api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
         return web.json_response({'api_token': api_token})
     except sqlite3.IntegrityError as e:
         if 'UNIQUE constraint failed' in str(e):
@@ -130,26 +134,28 @@ async def register(request):
 async def login(request):
     try:
         data = await request.json()
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
         print(data)
 
         if not email:
             return web.Response(status=400, text="Email is required.")
-        query = 'SELECT email, password FROM users WHERE email = ?'
+        query = "SELECT email, password FROM users WHERE email = ?"
         cursor.execute(query, (email))
         user_data = cursor.fetchone()
         if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
             # Password is correct, create and return a JWT token as the API token
             payload = {
-                'email': user_data[0],
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=30)
+                "email": user_data[0],
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
             }
-            api_token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+            api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
             print(api_token)
-            return web.json_response({'api_token': api_token})
+            return web.json_response({"api_token": api_token})
         else:
-            return web.Response(status=401, text="Invalid email or phone number or password.")
+            return web.Response(
+                status=401, text="Invalid email or phone number or password."
+            )
 
     except Exception as e:
         return web.Response(status=500, text=f"Error: {str(e)}")
@@ -171,13 +177,37 @@ async def passwordchange(request):
             hashed_password_old = cursor.fetchone()
             print(hashed_password_old)
             if passlib.hash.pbkdf2_sha256.verify(old_password, hashed_password_old[0]):
-                hashed_password_new = passlib.hash.pbkdf2_sha256.using(rounds=1000, salt_size=16).hash(new_password)
-                cursor.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password_new, email))
-        print('сделано')
+                hashed_password_new = passlib.hash.pbkdf2_sha256.using(
+                    rounds=1000, salt_size=16
+                ).hash(new_password)
+                cursor.execute(
+                    "UPDATE users SET password = ? WHERE email = ?",
+                    (hashed_password_new, email),
+                )
+        print("сделано")
         conn.commit()
         return web.Response(status=200, text=f"Пароль сменен")
     else:
         return web.Response(status=406, text=f"Пароли не совпадают")
+
+
+async def sdfds():
+    try:
+        cursor.execute("SELECT id, office_id, rating,text FROM reviews")
+        user_data = cursor.fetchone()
+        # if user_data and passlib.hash.pbkdf2_sha256.verify(password, user_data[2]):
+        #     # Password is correct, create and return a JWT token as the API token
+        #     payload = {
+        #         "email": user_data[0],
+        #         "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
+        #     }
+        #     api_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+        #     print(api_token)
+        #     return web.json_response({"api_token": api_token})
+        # else:
+        #     return web.Response(
+        #         status=401, text="Invalid email or phone number or password."
+        #     )
 
 
 async def ping(request):
