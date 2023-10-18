@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
 
-    //Создание объектов интерфейса
+    //Создание объектов UI
     EditText loginField;
     EditText passwordField;
     TextView forgotPassword;
@@ -40,5 +40,4 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
 }

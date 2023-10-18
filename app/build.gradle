@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'ru.team1802.mypostmail'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "ru.team1802.mypostmail"
@@ -15,6 +15,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
 
     buildTypes {
         release {
@@ -22,11 +25,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+//    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.44'
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    buildToolsVersion '33.0.1'
+    buildToolsVersion '34.0.0'
 }
 
 dependencies {
