@@ -178,6 +178,30 @@ async def login(request):
         return web.Response(status=500, text=f"Error: {str(e)}")
 
 
+async def addname_and_surname(request):
+    try:
+        data = await request.json()
+        name = data['name']
+        surname = data['surname']
+        api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
+        if not api_token:
+            return web.Response(status=401, text="JWT token missing in headers.")
+        try:
+            decoded_payload = jwt.decode(api_token, SECRET_KEY, algorithms=["HS256"])
+            email = decoded_payload.get('email')
+        except jwt.ExpiredSignatureError:
+            return web.Response(status=401, text="JWT token has expired.")
+        except jwt.InvalidTokenError:
+            return web.Response(status=401, text="Invalid JWT token.")
+        query = "UPDATE users SET name = ?, surname = ? WHERE email = ?"
+        cursor.execute(query, (name, surname, email))
+        conn.commit()
+        return web.Response(status=200, text=f"Имя и фамилия обновленна")
+    except Exception as e:
+        return web.Response(status=500, text=f"Error: {str(e)}")
+
+
+
 async def passwordchange(request):
     try:
         api_token = request.headers.get('Authorization', '').split('Bearer ')[-1]
@@ -261,6 +285,7 @@ app.router.add_post('/passwordchange', passwordchange)
 app.router.add_get('/getuserprofile', get_user_profile)
 app.router.add_post('/review', review)
 app.router.add_post('/forgot_password', forgot_password)
+app.router.add_post('/addname_and_surname', addname_and_surname)
 
 if __name__ == '__main__':
     web.run_app(app, host='0.0.0.0', port=8080)
